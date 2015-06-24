@@ -17,8 +17,10 @@ public class GameView extends SurfaceView {
 	private SurfaceHolder holder;
 	private GameThread gameLoop;
 	private Sprite sp;
+	private Bitmap tempBit;
 	long lastClick;
 	ArrayList<Sprite> sprite = new ArrayList<Sprite>();
+	ArrayList<TempSprite> temp = new ArrayList<TempSprite>();
 	
 	public GameView(Context context) {
 		super(context);
@@ -43,22 +45,15 @@ public class GameView extends SurfaceView {
 				
 			}
 		});
+		tempBit = BitmapFactory.decodeResource(getResources(),R.drawable.blood);
 		
 	}
 	@Override
 	protected void onDraw(Canvas canvas) {
 		canvas.drawColor(Color.WHITE);
-/*		if (x == getWidth() - map.getWidth()){
-			
-			xSpeed --;
+		for(int i =temp.size()-1 ; i >=0 ;i--){
+			temp.get(i).onDraw(canvas);
 		}
-		if(x==0){
-			xSpeed ++;
-		}
-		
-		x = x+xSpeed;
-			
-		canvas.drawBitmap(map,x, 10,null);*/
 		for(Sprite sprites : sprite){
 			sprites.onDraw(canvas);
 			
@@ -146,14 +141,17 @@ public class GameView extends SurfaceView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		
+	
 		if(System.currentTimeMillis() - lastClick > 500){
 			lastClick = System.currentTimeMillis();
+			float x = event.getX();
+			float y = event.getY();
 			synchronized (getHolder()) {
-				for(int i =0 ;i <sprite.size();i++){
+				for(int i =sprite.size()-1 ;i >=0;i--){
 					Sprite sprites = sprite.get(i);
-					if(sprites.isCollection(event.getX(), event.getY())){
+					if(sprites.isCollection(x,y)){
 						sprite.remove(sprites);
+						temp.add(new TempSprite(temp, this, x, y, tempBit));
 						break;
 					}
 					
